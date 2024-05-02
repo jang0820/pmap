@@ -13,9 +13,9 @@ class MapView(TemplateView):
             gps = -gps
         return gps
 
-    def image_getgps(self, dir, filename):
-        path = dir+"\\"+filename
-        with open(path, 'rb') as src:
+    def image_getgps(self, path, filename, dirname):
+        filepath = path+"\\"+filename
+        with open(filepath, 'rb') as src:
             img = exif.Image(src)
         if img.has_exif:
             try:
@@ -27,7 +27,7 @@ class MapView(TemplateView):
                 print ('沒有GPS資料')
         else:
             print ('圖片沒有EXIF資訊')
-        return  {"lat":gps[0], "lng":gps[1], "datetime":dt, "dir":dir, "filename":filename}
+        return  {"lat":gps[0], "lng":gps[1], "datetime":dt, "path":path, "dirname":dirname, "filename":filename}
     
     def tr_datetime(self, x):  #2024:04:25 11:42:08轉換成2024-04-25 11:42:08
         y = x[:4]+"-"+x[5:7]+"-"+x[8:10]+x[10:]
@@ -41,34 +41,32 @@ class MapView(TemplateView):
 
     def img2db(self, **kwargs):
         pwd = os.path.dirname(__file__)  #找出目前檔案views.py的所在資料夾
-        dir = pwd+'\\img'
-        files = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir,f))]
-        #filename = '1.jpg'
-        for file in files:
-            imgexif = self.image_getgps(dir, file)
-            if self.check_dul(imgexif['lat'], imgexif['lng'], imgexif['filename']) == False: #每張圖片只加入一次
-                imgobject = Img.objects.create(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=self.tr_datetime(imgexif['datetime']), filename=imgexif['filename'], dirname=imgexif['dir'])
-                imgobject.save()
+        path = pwd+'\\img'
+        dirs = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path,d))] #找出子資料夾
+        for dir in dirs:
+            path2 = path + "\\" + dir #子資料夾路徑
+            files = [f for f in os.listdir(path2) if os.path.isfile(os.path.join(path2,f))] #找出子資料夾下的圖檔
+            for file in files:
+                imgexif = self.image_getgps(path2, file, dir)
+                if self.check_dul(imgexif['lat'], imgexif['lng'], imgexif['filename']) == False: #每張圖片只加入一次
+                    imgobject = Img.objects.create(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=self.tr_datetime(imgexif['datetime']),path=imgexif['path'], filename=imgexif['filename'], dirname=imgexif['dirname'])
+                    imgobject.save()
+        first = Img.objects.filter(filename=files[0])
+        return {'lat':first[0].lat, 'lng':first[0].lng} #回傳第一個圖檔的GPS
 
 
     def get_context_data(self, **kwargs):
         figure = folium.Figure()
-        self.img2db()
-        '''pwd = os.path.dirname(__file__)  #找出目前檔案views.py的所在資料夾
-        filename = '1.jpg'
-        imgexif = self.image_getgps(pwd, filename)
-        if self.check_dul(imgexif['lat'], imgexif['lng'], imgexif['filename']) == False: #每張圖片只加入一次
-            imgobject = Img.objects.create(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=self.tr_datetime(imgexif['datetime']), filename=imgexif['filename'], dirname=imgexif['dir'])
-            imgobject.save()'''
+        img_gps = self.img2db() #取出第一個圖檔的GPS座標來建立地圖的起始位置
         #建立地圖
         map = folium.Map( 
-            location = [25.03, 121.6], #地圖開始的所在GPS
+            location = [img_gps['lat'], img_gps['lng']], #地圖開始的所在GPS
             zoom_start = 16,  #開始的地圖縮放程度
             tiles = 'OpenStreetMap')  #使用的地圖系統
         map.add_to(figure)       
         for imgexif in Img.objects.all():
             #使用popup建立彈出的圖片
-            encoded = base64.b64encode(open(imgexif.dirname +'\\'+imgexif.filename, 'rb').read())
+            encoded = base64.b64encode(open(imgexif.path +'\\'+imgexif.filename, 'rb').read())
             html = '<img src="data:image/jpeg;base64,{}">'.format
             iframe = folium.IFrame(html(encoded.decode('UTF-8')), width=160, height=160)
             x = folium.Popup(iframe, max_width=180)
@@ -77,7 +75,7 @@ class MapView(TemplateView):
             folium.Marker(
                 location = [imgexif.lat, imgexif.lng],
                 popup = x,
-                tooltip = '台北大縱走',
+                tooltip = imgexif.dirname,
                 icon = folium.Icon(icon='fa-mountain', prefix='fa')
             ).add_to(map)
         

@@ -8,6 +8,6 @@ class Img(models.Model):
     imgtime = models.DateTimeField(default=timezone.now)
     filename = models.CharField(max_length=100, verbose_name=_('filename'), help_text=_('filename'))
     dirname = models.CharField(max_length=100, verbose_name=_('dirname'), help_text=_('dirname'))
-
+    path = models.CharField(max_length=200, verbose_name=_('path'), help_text=_('path'), default='')
     def __str__(self):
         return self.filename
