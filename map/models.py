@@ -10,4 +10,4 @@ class Img(models.Model):
     dirname = models.CharField(max_length=100, verbose_name=_('dirname'), help_text=_('dirname'))
 
     def __str__(self):
-        return self.title
+        return self.filename
