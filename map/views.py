@@ -39,25 +39,23 @@ class MapView(TemplateView):
         else:
             return False
 
-    def img2db(self, **kwargs):
+    def img2db(self, dirname):  #找出所有資料夾下圖片加到資料庫，並傳回最後一個資料夾的第一個圖片GPS
         pwd = os.path.dirname(__file__)  #找出目前檔案views.py的所在資料夾
         path = pwd+'\\img'
-        dirs = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path,d))] #找出子資料夾
-        for dir in dirs:
-            path2 = path + "\\" + dir #子資料夾路徑
-            files = [f for f in os.listdir(path2) if os.path.isfile(os.path.join(path2,f))] #找出子資料夾下的圖檔
-            for file in files:
-                imgexif = self.image_getgps(path2, file, dir)
-                if self.check_dul(imgexif['lat'], imgexif['lng'], imgexif['filename']) == False: #每張圖片只加入一次
-                    imgobject = Img.objects.create(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=self.tr_datetime(imgexif['datetime']),path=imgexif['path'], filename=imgexif['filename'], dirname=imgexif['dirname'])
-                    imgobject.save()
+        path2 = path + "\\" + dirname #子資料夾路徑
+        files = [f for f in os.listdir(path2) if os.path.isfile(os.path.join(path2,f))] #找出子資料夾下的圖檔
+        for file in files:
+            imgexif = self.image_getgps(path2, file, dir)
+            if self.check_dul(imgexif['lat'], imgexif['lng'], imgexif['filename']) == False: #每張圖片只加入一次
+                imgobject = Img.objects.create(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=self.tr_datetime(imgexif['datetime']),path=imgexif['path'], filename=imgexif['filename'], dirname=imgexif['dirname'])
+                imgobject.save()
         first = Img.objects.filter(filename=files[0])
         return {'lat':first[0].lat, 'lng':first[0].lng} #回傳第一個圖檔的GPS
-
-
+    
     def get_context_data(self, **kwargs):
+        dirname = kwargs['dirname']
         figure = folium.Figure()
-        img_gps = self.img2db() #取出第一個圖檔的GPS座標來建立地圖的起始位置
+        img_gps = self.img2db(dirname) #取出第一個圖檔的GPS座標來建立地圖的起始位置
         #建立地圖
         map = folium.Map( 
             location = [img_gps['lat'], img_gps['lng']], #地圖開始的所在GPS
