@@ -5,9 +5,12 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from . import models
 import os
+import shutil
+import zipfile
+from pathlib import Path
 
 @login_required
-def uploadFile(request):
+def uploadFile(request):  #上傳多張圖片的zip檔
     if request.method == "POST":
         if request.POST["fileTitle"]:
             fileTitle = request.POST["fileTitle"]
@@ -21,8 +24,8 @@ def uploadFile(request):
             	user = request.user
             )
         file.save()
-    files = models.File.objects.all()
-    return render(request, "file/upload-file.html", context = { "files": files })
+    files = models.File.objects.all().order_by("-id") #新上傳的壓縮檔放前面
+    return render(request, "upload-file.html", context = { "files": files })
 
 
 @login_required
@@ -50,3 +53,18 @@ def downloadFile(request, pk):
         return response
     else:
         return HttpResponse('檔案不存在!')
+    
+@login_required
+def unzipFile(request, pk):  #將多張圖片的zip檔進行解壓縮
+    dir = 'media/img/'
+    unzipfile = models.File.objects.filter(pk = pk)
+    f = unzipfile[0]
+    if (f.user == request.user and request.user.has_perm('file.file_upload')): #檔案上傳者且有上傳權限者才能解壓縮
+        with zipfile.ZipFile(f.uploadedFile.path,"r") as zip:
+            dirr = zip.namelist()[0]
+            odir = zip.namelist()[0].split('/')[0]  #壓縮檔只能有一層資料夾，取出資料夾名稱
+            ndir = odir.encode('cp437').decode('big5')  #解壓縮中文資料夾出現亂碼進行修正
+            if os.path.isdir(dir+ndir)==False: #檢查是否有相同資料夾，避免重複解壓縮
+                zip.extractall(dir) #解壓縮
+                os.rename(dir+odir,dir+ndir)  #重新命名資料夾
+    return HttpResponseRedirect(reverse('file:upload'))

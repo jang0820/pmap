@@ -4,6 +4,7 @@ import base64
 import exif
 import os
 from map.models import Img
+from pmap import settings
 
 class MapView(TemplateView):
     template_name = 'map.html'    
@@ -40,15 +41,17 @@ class MapView(TemplateView):
             return False
 
     def img2db(self, dirname):  #找出所有資料夾下圖片加到資料庫，並傳回最後一個資料夾的第一個圖片GPS
-        pwd = os.path.dirname(__file__)  #找出目前檔案views.py的所在資料夾
-        path = pwd+'\\img'
-        path2 = path + "\\" + dirname #子資料夾路徑
-        files = [f for f in os.listdir(path2) if os.path.isfile(os.path.join(path2,f))] #找出子資料夾下的圖檔
+        #pwd = os.path.dirname(__file__)  #找出目前檔案views.py的所在資料夾
+        #path = pwd+'\\img'
+        #path2 = path + "\\" + dirname #子資料夾路徑
+        path = str(settings.BASE_DIR)+ "\\media\\img\\"+ dirname #子資料夾路徑
+        files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] #找出子資料夾下的圖檔
         for file in files:
-            imgexif = self.image_getgps(path2, file, dir)
-            if self.check_dul(imgexif['lat'], imgexif['lng'], imgexif['filename']) == False: #每張圖片只加入一次
-                imgobject = Img.objects.create(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=self.tr_datetime(imgexif['datetime']),path=imgexif['path'], filename=imgexif['filename'], dirname=imgexif['dirname'])
-                imgobject.save()
+            imgexif = self.image_getgps(path, file, dir)
+            if self.check_dul(imgexif['lat'], imgexif['lng'], imgexif['filename']) == True: #出現過的刪除，重新加入
+                Img.objects.filter(lat=imgexif['lat'], lng=imgexif['lng'], filename=imgexif['filename']).delete() #刪除舊的
+            imgobject = Img.objects.create(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=self.tr_datetime(imgexif['datetime']),path=imgexif['path'], filename=imgexif['filename'], dirname=imgexif['dirname'])
+            imgobject.save()
         first = Img.objects.filter(filename=files[0])
         return {'lat':first[0].lat, 'lng':first[0].lng} #回傳第一個圖檔的GPS
     
