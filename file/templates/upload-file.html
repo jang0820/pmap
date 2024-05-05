@@ -18,6 +18,7 @@
             <th scope="col">User</th>
             <th scope="col">Download</th>
             <th scope="col">Delete</th>
+            <th scope="col">Unzip</th>
         </tr>
         {% for file in files %}
             <tr>
@@ -31,5 +32,6 @@
             </tr>
         {% endfor %}
     </table>
+    <a class="h3" href="{% url 'map:list' %}">查看相簿地圖</a>
 {% endif %}
 {% endblock %}

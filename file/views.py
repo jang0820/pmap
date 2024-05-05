@@ -8,6 +8,7 @@ import os
 import shutil
 import zipfile
 from pathlib import Path
+from map.models import Img
 
 @login_required
 def uploadFile(request):  #上傳多張圖片的zip檔
@@ -31,13 +32,16 @@ def uploadFile(request):  #上傳多張圖片的zip檔
 @login_required
 def deleteFile(request, pk):
     dir = 'media/'
+    unzipdir = 'media/img/'
     deletefile = models.File.objects.filter(pk = pk)
     f = deletefile[0]
     if (f.user == request.user and request.user.has_perm('file.file_delete')): #檔案上傳者且有刪除權限者才能刪除
+        dirname = f.title[:-4]  #壓縮檔的檔名，去除.zip
         os.remove(dir+'{}'.format(f.uploadedFile))
         models.File.objects.filter(pk = pk).delete()
+        shutil.rmtree(unzipdir+dirname)  #刪除解壓縮資料夾
+        Img.objects.filter(dirname = dirname).delete()  #刪除該資料夾再資料表Img的所有圖片資料
     return HttpResponseRedirect(reverse('file:upload'))
-
 
 @login_required
 def downloadFile(request, pk):
@@ -64,7 +68,8 @@ def unzipFile(request, pk):  #將多張圖片的zip檔進行解壓縮
             dirr = zip.namelist()[0]
             odir = zip.namelist()[0].split('/')[0]  #壓縮檔只能有一層資料夾，取出資料夾名稱
             ndir = odir.encode('cp437').decode('big5')  #解壓縮中文資料夾出現亂碼進行修正
-            if os.path.isdir(dir+ndir)==False: #檢查是否有相同資料夾，避免重複解壓縮
-                zip.extractall(dir) #解壓縮
-                os.rename(dir+odir,dir+ndir)  #重新命名資料夾
+            if os.path.isdir(dir+ndir)==True: #檢查是否有相同資料夾，先刪除資料夾再解壓縮
+                shutil.rmtree(dir+ndir)  #刪除資料夾
+            zip.extractall(dir) #解壓縮
+            os.rename(dir+odir,dir+ndir)  #重新命名資料夾
     return HttpResponseRedirect(reverse('file:upload'))

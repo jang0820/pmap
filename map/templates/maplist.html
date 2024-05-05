@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>相簿地圖</h1>
+  {% if dirs %}
+    <ul>
+      {% for dir in dirs %}
+      <li  class="h3">
+        <a href="{% url 'map:godir' dir %}">{{ dir }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>沒有圖片資料夾</p>
+  {% endif %}
+{% endblock %}
