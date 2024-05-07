@@ -13,14 +13,18 @@ class MapView(TemplateView):
         if ref == "S" or ref =='W' :
             gps = -gps
         return gps
-
+    
+    def tr_datetime(self, x):  #2024:04:25 11:42:08轉換成2024-04-25 11:42:08
+        y = x[:4]+"-"+x[5:7]+"-"+x[8:10]+x[10:]
+        return y
+    
     def image_getgps(self, path, filename, dirname):  #找出圖片exif的GPS、日期時間、檔案名稱與資料夾
         filepath = path+"\\"+filename
         with open(filepath, 'rb') as src:
             img = exif.Image(src)
         if img.has_exif:
             try:
-                img.gps_longitude
+                img.gps_longitude #讀取GPS資料
                 gps = (self.data2gps(img.gps_latitude, img.gps_latitude_ref), 
                        self.data2gps(img.gps_longitude, img.gps_longitude_ref)) #相片的GPS轉換成GPS數值
                 dt = self.tr_datetime(img.datetime)
@@ -29,11 +33,7 @@ class MapView(TemplateView):
         else:
             print ('圖片沒有EXIF資訊')
         return  {"lat":gps[0], "lng":gps[1], "datetime":dt, "path":path, "dirname":dirname, "filename":filename}
-    
-    def tr_datetime(self, x):  #2024:04:25 11:42:08轉換成2024-04-25 11:42:08
-        y = x[:4]+"-"+x[5:7]+"-"+x[8:10]+x[10:]
-        return y
-    
+
     def check_dul(self, lat, lng, datetime):  #檢查該圖片是否已經加入資料庫
         if len(Img.objects.filter(lat=lat, lng=lng, imgtime=datetime)) > 0:
             return True
@@ -41,7 +41,6 @@ class MapView(TemplateView):
             return False
 
     def img2db(self, dirname):  #找出所有資料夾下圖片加到資料庫，並傳回最後一個資料夾的第一個圖片GPS
-        #pwd = os.path.dirname(__file__)  #找出目前檔案views.py的所在資料夾
         path = str(settings.BASE_DIR)+ "\\media\\img\\"+ dirname #子資料夾路徑
         files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] #找出子資料夾下的圖檔
         for file in files:
@@ -60,9 +59,10 @@ class MapView(TemplateView):
         #建立地圖
         map = folium.Map( 
             location = [img_gps['lat'], img_gps['lng']], #地圖開始的所在GPS
-            zoom_start = 16,  #開始的地圖縮放程度
+            zoom_start = 16,  #地圖縮放程度
             tiles = 'OpenStreetMap')  #使用的地圖系統
         map.add_to(figure)       
+        
         for imgexif in Img.objects.all():
             #使用popup建立彈出的圖片
             encoded = base64.b64encode(open(imgexif.path +'\\'+imgexif.filename, 'rb').read())
