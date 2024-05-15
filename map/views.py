@@ -61,13 +61,13 @@ class MapView(TemplateView):
             location = [img_gps['lat'], img_gps['lng']], #地圖開始的所在GPS
             zoom_start = 16,  #地圖縮放程度
             tiles = 'OpenStreetMap')  #使用的地圖系統
-        map.add_to(figure)       
+        map.add_to(figure)
         
-        for imgexif in Img.objects.all():
+        for imgexif in Img.objects.filter(dirname=dirname): #只取資料庫內指定dirname的圖片
             #使用popup建立彈出的圖片
             encoded = base64.b64encode(open(imgexif.path +'\\'+imgexif.filename, 'rb').read())
             html = '<img src="data:image/jpeg;base64,{}">'.format
-            iframe = folium.IFrame(html(encoded.decode('UTF-8')), width=160, height=160)
+            iframe = folium.IFrame(html(encoded.decode('UTF-8')), width=170, height=170)
             x = folium.Popup(iframe, max_width=180)
 
             #將上方popup新增到此marker
