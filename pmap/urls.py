@@ -26,4 +26,4 @@ urlpatterns = [
     path('map/', include('map.urls')),
     path('gal/', include('gal.urls')),
 ]
-urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT) #讓網址media對應到資料夾media

@@ -3,15 +3,9 @@
 {% block content %}
   <h1>相簿</h1>
   {% if imgs %}
-    <ul>
       {% for img in imgs %}
-      <li  class="h3">
-        <img
-  src="{{MEDIA_URL}}img/{{img.dirname}}/{{img.filename}}"
-  width="200" />
-      </li>
+        <img src="{{MEDIA_URL}}img/{{img.dirname}}/{{img.filename}}" width="200" />
       {% endfor %}
-    </ul>
   {% else %}
     <p>沒有圖片</p>
   {% endif %}

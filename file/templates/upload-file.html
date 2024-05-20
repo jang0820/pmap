@@ -19,6 +19,7 @@
             <th scope="col">Download</th>
             <th scope="col">Delete</th>
             <th scope="col">Unzip</th>
+            <th scope="col">Thumbtail</th>
         </tr>
         {% for file in files %}
             <tr>
@@ -29,6 +30,7 @@
                 <td> <a href="{% url 'file:download' file.id %}">下載</a></td>
                 <td> <a href="{% url 'file:delete' file.id %}">删除</a></td>
                 <td> <a href="{% url 'file:unzip' file.id %}">解壓縮</a></td>
+                <td> <a href="{% url 'file:thumb' file.id %}">縮圖</a></td>
             </tr>
         {% endfor %}
     </table>

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1>相簿地圖</h1>
+  <h1>相簿</h1>
   {% if dirs %}
     <ul>
       {% for dir in dirs %}
       <li  class="h3">
-        <a href="{% url 'map:listdir' dir %}">{{ dir }}</a>
+        <a href="{% url 'gal:listdir' dir %}">{{ dir }}</a>
       </li>
       {% endfor %}
     </ul>

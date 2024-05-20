@@ -4,7 +4,7 @@ from django.views.generic import TemplateView, ListView
 from pmap import settings
 import os
 
-class ImgListView(TemplateView):
+class GalView(TemplateView):
     template_name = 'img.html'
     imgpath = str(settings.BASE_DIR)+ "\\media\\img\\"
 
@@ -19,3 +19,13 @@ class ImgListView(TemplateView):
         return context
     
 
+class GalListView(ListView):
+    template_name = 'gallist.html'
+    imgpath = str(settings.BASE_DIR)+ "\\media\\img\\"
+    dirs = [d for d in os.listdir(imgpath) if os.path.isdir(os.path.join(str(settings.BASE_DIR)+ "\\media\\img\\", d))] #找出子資料夾
+    queryset = {}
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["dirs"] = self.dirs
+        return context

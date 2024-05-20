@@ -9,6 +9,8 @@ import shutil
 import zipfile
 from pathlib import Path
 from map.models import Img
+import exif
+from PIL import Image #PIL 安裝pip install Pillow
 
 @login_required
 def uploadFile(request):  #上傳多張圖片的zip檔
@@ -64,12 +66,32 @@ def unzipFile(request, pk):  #將多張圖片的zip檔進行解壓縮
     unzipfile = models.File.objects.filter(pk = pk)
     f = unzipfile[0]
     if (f.user == request.user and request.user.has_perm('file.file_upload')): #檔案上傳者且有上傳權限者才能解壓縮
-        with zipfile.ZipFile(f.uploadedFile.path,"r") as zip:
-            dirr = zip.namelist()[0]
+        with zipfile.ZipFile(f.uploadedFile.path, "r") as zip:
+            #dirr = zip.namelist()[0]
             odir = zip.namelist()[0].split('/')[0]  #壓縮檔只能有一層資料夾，取出資料夾名稱
             ndir = odir.encode('cp437').decode('big5')  #解壓縮中文資料夾出現亂碼進行修正
             if os.path.isdir(dir+ndir)==True: #檢查是否有相同資料夾，先刪除資料夾再解壓縮
                 shutil.rmtree(dir+ndir)  #刪除資料夾
             zip.extractall(dir) #解壓縮
             os.rename(dir+odir,dir+ndir)  #重新命名資料夾
+    return HttpResponseRedirect(reverse('file:upload'))
+
+@login_required
+def makeThumbnail(request, pk):  #將多張圖片的zip檔進行解壓縮
+    dir = 'media/img/'
+    unzipfile = models.File.objects.filter(pk = pk)
+    f = unzipfile[0]
+    if (f.user == request.user and request.user.has_perm('file.file_upload')): #檔案上傳者且有上傳權限者才能解壓縮
+        dirname = f.title[:-4]  #壓縮檔的檔名，去除.zip
+        dirpath = dir+dirname
+        #os.chdir(dirpath)  # 更換資料夾
+        #找出不是ss開頭的圖片檔
+        files = [f for f in os.listdir(dirpath) if os.path.isfile(os.path.join(dirpath,f)) and f[0:2]!='th']  #
+
+        for f in files:
+            img = Image.open(dirpath+'/'+f)
+            ex = img.info['exif']
+            img.thumbnail((150, 150)) #製作縮圖
+            print(img.size)
+            img.save(dirpath+'/th_'+f, exif=ex)  #儲存時會根據exif資料進行旋轉，不需事先旋轉
     return HttpResponseRedirect(reverse('file:upload'))
