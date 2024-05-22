@@ -86,12 +86,12 @@ def makeThumbnail(request, pk):  #將多張圖片的zip檔進行解壓縮
         dirpath = dir+dirname
         #os.chdir(dirpath)  # 更換資料夾
         #找出不是ss開頭的圖片檔
-        files = [f for f in os.listdir(dirpath) if os.path.isfile(os.path.join(dirpath,f)) and f[0:2]!='th']  #
+        files = [f for f in os.listdir(dirpath) if os.path.isfile(os.path.join(dirpath,f)) and f[0:2]!='tH']  #
 
         for f in files:
             img = Image.open(dirpath+'/'+f)
             ex = img.info['exif']
             img.thumbnail((150, 150)) #製作縮圖
             print(img.size)
-            img.save(dirpath+'/th_'+f, exif=ex)  #儲存時會根據exif資料進行旋轉，不需事先旋轉
+            img.save(dirpath+'/tH_'+f, exif=ex)  #儲存時會根據exif資料進行旋轉，不需事先旋轉
     return HttpResponseRedirect(reverse('file:upload'))
