@@ -11,6 +11,53 @@ from pathlib import Path
 from map.models import Img
 import exif
 from PIL import Image #PIL 安裝pip install Pillow
+from pmap import settings
+
+
+def data2gps(data, ref): #將相片的GPS資料轉換成GPS數值
+    gps = data[0] + data[1] / 60 + data[2] / 3600
+    if ref == "S" or ref =='W' :
+        gps = -gps
+    return gps
+    
+def tr_datetime(x):  #2024:04:25 11:42:08轉換成2024-04-25 11:42:08
+    y = x[:4]+"-"+x[5:7]+"-"+x[8:10]+x[10:]
+    return y
+    
+def image_getgps(path, filename, dirname):  #找出圖片exif的GPS、日期時間、檔案名稱與資料夾
+    filepath = path+"\\"+filename
+    with open(filepath, 'rb') as src:
+        img = exif.Image(src)
+    if img.has_exif:
+        try:
+            img.gps_longitude #讀取GPS資料
+            gps = (data2gps(img.gps_latitude, img.gps_latitude_ref), 
+                    data2gps(img.gps_longitude, img.gps_longitude_ref)) #相片的GPS轉換成GPS數值
+            dt = tr_datetime(img.datetime)
+        except AttributeError:
+            print ('沒有GPS資料')
+    else:
+        print ('圖片沒有EXIF資訊')
+    return  {"lat":gps[0], "lng":gps[1], "datetime":dt, "path":path, "dirname":dirname, "filename":filename}
+
+def check_dul(lat, lng, datetime, filename):  #檢查該圖片是否已經加入資料庫
+    if len(Img.objects.filter(lat=lat, lng=lng, imgtime=datetime, filename=filename)) > 0:
+        return True
+    else:
+        return False
+
+def img2db(dirname):  #找出所有資料夾下圖片加到資料庫，並傳回最後一個資料夾的第一個圖片GPS
+    path = str(settings.BASE_DIR)+ "\\media\\img\\"+ dirname #子資料夾路徑
+    files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] #找出子資料夾下的tH開頭的縮圖圖檔
+    for file in files:
+        imgexif = image_getgps(path, file, dirname)
+        if check_dul(imgexif['lat'], imgexif['lng'], imgexif['datetime'], imgexif['filename']) == True: #出現過的圖片刪除，重新加入
+            Img.objects.filter(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=imgexif['datetime'], filename=imgexif['filename']).delete() #刪除舊的
+        imgobject = Img.objects.create(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=imgexif['datetime'],path=imgexif['path'], filename=imgexif['filename'], dirname=imgexif['dirname'])
+        imgobject.save()
+    first = Img.objects.filter(filename=files[0])
+    return {'lat':first[0].lat, 'lng':first[0].lng} #回傳第一個圖檔的GPS
+
 
 @login_required
 def uploadFile(request):  #上傳多張圖片的zip檔
@@ -94,4 +141,6 @@ def makeThumbnail(request, pk):  #將多張圖片的zip檔進行解壓縮
             img.thumbnail((150, 150)) #製作縮圖
             print(img.size)
             img.save(dirpath+'/tH_'+f, exif=ex)  #儲存時會根據exif資料進行旋轉，不需事先旋轉
+        img2db(dirname)
     return HttpResponseRedirect(reverse('file:upload'))
+
