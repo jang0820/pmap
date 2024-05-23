@@ -42,7 +42,7 @@ class MapView(TemplateView):
 
     def img2db(self, dirname):  #找出所有資料夾下圖片加到資料庫，並傳回最後一個資料夾的第一個圖片GPS
         path = str(settings.BASE_DIR)+ "\\media\\img\\"+ dirname #子資料夾路徑
-        files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] #找出子資料夾下的圖檔
+        files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f)) and f[0:2]=='tH'] #找出子資料夾下的tH開頭的縮圖圖檔
         for file in files:
             imgexif = self.image_getgps(path, file, dirname)
             if self.check_dul(imgexif['lat'], imgexif['lng'], imgexif['datetime']) == True: #出現過的圖片刪除，重新加入
