@@ -48,7 +48,7 @@ def check_dul(lat, lng, datetime, filename):  #檢查該圖片是否已經加入
 
 def img2db(dirname):  #找出所有資料夾下圖片加到資料庫，並傳回最後一個資料夾的第一個圖片GPS
     path = str(settings.BASE_DIR)+ "\\media\\img\\"+ dirname #子資料夾路徑
-    files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] #找出子資料夾下的tH開頭的縮圖圖檔
+    files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] #找出子資料夾下的所有圖檔
     for file in files:
         imgexif = image_getgps(path, file, dirname)
         if check_dul(imgexif['lat'], imgexif['lng'], imgexif['datetime'], imgexif['filename']) == True: #出現過的圖片刪除，重新加入
@@ -124,7 +124,7 @@ def unzipFile(request, pk):  #將多張圖片的zip檔進行解壓縮
     return HttpResponseRedirect(reverse('file:upload'))
 
 @login_required
-def makeThumbnail(request, pk):  #將多張圖片的zip檔進行解壓縮
+def makeThumbnail(request, pk):  #製作縮圖並將圖檔加入資料庫
     dir = 'media/img/'
     unzipfile = models.File.objects.filter(pk = pk)
     f = unzipfile[0]
@@ -141,6 +141,6 @@ def makeThumbnail(request, pk):  #將多張圖片的zip檔進行解壓縮
             img.thumbnail((150, 150)) #製作縮圖
             print(img.size)
             img.save(dirpath+'/tH_'+f, exif=ex)  #儲存時會根據exif資料進行旋轉，不需事先旋轉
-        img2db(dirname)
+        img2db(dirname)  #將圖檔與縮圖檔案加入資料庫
     return HttpResponseRedirect(reverse('file:upload'))
 

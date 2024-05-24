@@ -1,12 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1>相簿</h1>
-  {% if imgs %}
-      {% for img in imgs %}
-        <img src="{{MEDIA_URL}}img/{{img.dirname}}/{{img.filename}}" width="200" />
-      {% endfor %}
-  {% else %}
+<div id="nanogallery2"></div>
+<script>
+$("#nanogallery2").nanogallery2({
+thumbnailWidth: 200, // 縮圖寬度
+thumbnailHeight: 200, // 縮圖高度
+galleryDisplayMode: "moreButton",
+galleryDisplayMoreStep: 4, // 最多顯示幾行
+<!-- IMAGES -->
+{% if imgs %}
+    items: [
+    {% for img in imgs %}
+        {src: "{{MEDIA_URL}}img/{{img.dirname}}/{{img.filename}}",
+        srct: "{{MEDIA_URL}}img/{{img.dirname}}/{{img.filename}}",
+        title: '{{img.dirname}}'},
+    {% endfor %} ]
+{% else %}
     <p>沒有圖片</p>
-  {% endif %}
+{% endif %}
+});
+</script>
 {% endblock %}
