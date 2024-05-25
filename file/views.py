@@ -46,7 +46,7 @@ def check_dul(lat, lng, datetime, filename):  #檢查該圖片是否已經加入
     else:
         return False
 
-def img2db(dirname):  #找出所有資料夾下圖片加到資料庫，並傳回最後一個資料夾的第一個圖片GPS
+def img2db(dirname):  #找出所有資料夾下圖片加到資料庫
     path = str(settings.BASE_DIR)+ "\\media\\img\\"+ dirname #子資料夾路徑
     files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] #找出子資料夾下的所有圖檔
     for file in files:
@@ -55,8 +55,6 @@ def img2db(dirname):  #找出所有資料夾下圖片加到資料庫，並傳回
             Img.objects.filter(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=imgexif['datetime'], filename=imgexif['filename']).delete() #刪除舊的
         imgobject = Img.objects.create(lat=imgexif['lat'], lng=imgexif['lng'], imgtime=imgexif['datetime'],path=imgexif['path'], filename=imgexif['filename'], dirname=imgexif['dirname'])
         imgobject.save()
-    first = Img.objects.filter(filename=files[0])
-    return {'lat':first[0].lat, 'lng':first[0].lng} #回傳第一個圖檔的GPS
 
 
 @login_required
@@ -114,7 +112,6 @@ def unzipFile(request, pk):  #將多張圖片的zip檔進行解壓縮
     f = unzipfile[0]
     if (f.user == request.user and request.user.has_perm('file.file_upload')): #檔案上傳者且有上傳權限者才能解壓縮
         with zipfile.ZipFile(f.uploadedFile.path, "r") as zip:
-            #dirr = zip.namelist()[0]
             odir = zip.namelist()[0].split('/')[0]  #壓縮檔只能有一層資料夾，取出資料夾名稱
             ndir = odir.encode('cp437').decode('big5')  #解壓縮中文資料夾出現亂碼進行修正
             if os.path.isdir(dir+ndir)==True: #檢查是否有相同資料夾，先刪除資料夾再解壓縮
@@ -131,8 +128,7 @@ def makeThumbnail(request, pk):  #製作縮圖並將圖檔加入資料庫
     if (f.user == request.user and request.user.has_perm('file.file_upload')): #檔案上傳者且有上傳權限者才能解壓縮
         dirname = f.title[:-4]  #壓縮檔的檔名，去除.zip
         dirpath = dir+dirname
-        #os.chdir(dirpath)  # 更換資料夾
-        #找出不是ss開頭的圖片檔
+        #找出不是tH開頭的圖片檔
         files = [f for f in os.listdir(dirpath) if os.path.isfile(os.path.join(dirpath,f)) and f[0:2]!='tH']  #
 
         for f in files:

@@ -1,44 +1,12 @@
 from django.views.generic import TemplateView, ListView
 import folium
 import base64
-import exif
 import os
 from map.models import Img
 from pmap import settings
 
-class MapView(TemplateView):
+class MapView(TemplateView): #列出指定資料夾下所有圖片到地圖上
     template_name = 'map.html'    
-    def data2gps(self, data, ref): #將相片的GPS資料轉換成GPS數值
-        gps = data[0] + data[1] / 60 + data[2] / 3600
-        if ref == "S" or ref =='W' :
-            gps = -gps
-        return gps
-    
-    def tr_datetime(self, x):  #2024:04:25 11:42:08轉換成2024-04-25 11:42:08
-        y = x[:4]+"-"+x[5:7]+"-"+x[8:10]+x[10:]
-        return y
-    
-    def image_getgps(self, path, filename, dirname):  #找出圖片exif的GPS、日期時間、檔案名稱與資料夾
-        filepath = path+"\\"+filename
-        with open(filepath, 'rb') as src:
-            img = exif.Image(src)
-        if img.has_exif:
-            try:
-                img.gps_longitude #讀取GPS資料
-                gps = (self.data2gps(img.gps_latitude, img.gps_latitude_ref), 
-                       self.data2gps(img.gps_longitude, img.gps_longitude_ref)) #相片的GPS轉換成GPS數值
-                dt = self.tr_datetime(img.datetime)
-            except AttributeError:
-                print ('沒有GPS資料')
-        else:
-            print ('圖片沒有EXIF資訊')
-        return  {"lat":gps[0], "lng":gps[1], "datetime":dt, "path":path, "dirname":dirname, "filename":filename}
-
-    def check_dul(self, lat, lng, datetime):  #檢查該圖片是否已經加入資料庫
-        if len(Img.objects.filter(lat=lat, lng=lng, imgtime=datetime)) > 0:
-            return True
-        else:
-            return False
 
     def get_gps(self, dirname):  #傳回指定資料夾內的第一個圖片GPS
         path = str(settings.BASE_DIR)+ "\\media\\img\\"+ dirname #子資料夾路徑
@@ -77,7 +45,7 @@ class MapView(TemplateView):
         return {"map": figure}
 
 
-class MapListView(ListView):
+class MapListView(ListView):  #列出資料夾media\img下所有子資料夾
     template_name = 'maplist.html'
     imgpath = str(settings.BASE_DIR)+ "\\media\\img\\"
     dirs = [d for d in os.listdir(imgpath) if os.path.isdir(os.path.join(str(settings.BASE_DIR)+ "\\media\\img\\", d))] #找出子資料夾

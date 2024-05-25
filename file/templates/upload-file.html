@@ -13,13 +13,13 @@
     <table  class="table table-dark">
         <tr>
             <th scope="col">ID</th>
-            <th scope="col">Title or filename</th>
-            <th scope="col">Upload DateTime</th>
-            <th scope="col">User</th>
-            <th scope="col">Download</th>
-            <th scope="col">Delete</th>
-            <th scope="col">Unzip</th>
-            <th scope="col">Thumbtail</th>
+            <th scope="col">檔案名稱</th>
+            <th scope="col">上傳時間</th>
+            <th scope="col">使用者</th>
+            <th scope="col">下載</th>
+            <th scope="col">刪除</th>
+            <th scope="col">解壓縮</th>
+            <th scope="col">製作縮圖</th>
         </tr>
         {% for file in files %}
             <tr>
@@ -30,7 +30,7 @@
                 <td> <a href="{% url 'file:download' file.id %}">下載</a></td>
                 <td> <a href="{% url 'file:delete' file.id %}">删除</a></td>
                 <td> <a href="{% url 'file:unzip' file.id %}">解壓縮</a></td>
-                <td> <a href="{% url 'file:thumb' file.id %}">縮圖</a></td>
+                <td> <a href="{% url 'file:thumb' file.id %}">製作縮圖</a></td>
             </tr>
         {% endfor %}
     </table>
