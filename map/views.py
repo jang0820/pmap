@@ -27,7 +27,7 @@ class MapView(TemplateView): #列出指定資料夾下所有圖片到地圖上
         
         for imgexif in Img.objects.filter(dirname=dirname, filename__startswith="tH"): #只取資料庫內指定dirname的資料夾內，開頭是tH的圖片
             #使用popup建立彈出的圖片
-            encoded = base64.b64encode(open(imgexif.path +'\\'+imgexif.filename, 'rb').read())
+            encoded = base64.b64encode(open(imgexif.path +'/'+imgexif.filename, 'rb').read())
             html = '<img src="data:image/jpeg;base64,{}">'.format
             iframe = folium.IFrame(html(encoded.decode('UTF-8')), width=170, height=170)
             x = folium.Popup(iframe, max_width=180)
@@ -48,7 +48,7 @@ class MapView(TemplateView): #列出指定資料夾下所有圖片到地圖上
 class MapListView(ListView):  #列出資料夾media\img下所有子資料夾
     template_name = 'maplist.html'
     imgpath = str(settings.BASE_DIR)+ "/media/img/"
-    dirs = [d for d in os.listdir(imgpath) if os.path.isdir(os.path.join(str(settings.BASE_DIR)+ "\\media\\img\\", d))] #找出子資料夾
+    dirs = [d for d in os.listdir(imgpath) if os.path.isdir(os.path.join(str(settings.BASE_DIR)+ "/media/img/", d))] #找出子資料夾
     queryset = {}
     
     def get_context_data(self, **kwargs):
