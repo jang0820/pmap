@@ -9,7 +9,7 @@ class MapView(TemplateView): #列出指定資料夾下所有圖片到地圖上
     template_name = 'map.html'    
 
     def get_gps(self, dirname):  #傳回指定資料夾內的第一個圖片GPS
-        path = str(settings.BASE_DIR)+ "\\media\\img\\"+ dirname #子資料夾路徑
+        path = str(settings.BASE_DIR)+ "/media/img/"+ dirname #子資料夾路徑
         files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f)) and f[0:2]=='tH'] #找出子資料夾下的tH開頭的縮圖圖檔
         first = Img.objects.filter(filename=files[0])
         return {'lat':first[0].lat, 'lng':first[0].lng} #回傳第一個圖檔的GPS
@@ -47,7 +47,7 @@ class MapView(TemplateView): #列出指定資料夾下所有圖片到地圖上
 
 class MapListView(ListView):  #列出資料夾media\img下所有子資料夾
     template_name = 'maplist.html'
-    imgpath = str(settings.BASE_DIR)+ "\\media\\img\\"
+    imgpath = str(settings.BASE_DIR)+ "/media/img/"
     dirs = [d for d in os.listdir(imgpath) if os.path.isdir(os.path.join(str(settings.BASE_DIR)+ "\\media\\img\\", d))] #找出子資料夾
     queryset = {}
     

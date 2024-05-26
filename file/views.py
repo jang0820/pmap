@@ -25,7 +25,7 @@ def tr_datetime(x):  #2024:04:25 11:42:08轉換成2024-04-25 11:42:08
     return y
     
 def image_getgps(path, filename, dirname):  #找出圖片exif的GPS、日期時間、檔案名稱與資料夾
-    filepath = path+"\\"+filename
+    filepath = path+"/"+filename
     with open(filepath, 'rb') as src:
         img = exif.Image(src)
     if img.has_exif:
@@ -47,7 +47,7 @@ def check_dul(lat, lng, datetime, filename):  #檢查該圖片是否已經加入
         return False
 
 def img2db(dirname):  #找出所有資料夾下圖片加到資料庫
-    path = str(settings.BASE_DIR)+ "\\media\\img\\"+ dirname #子資料夾路徑
+    path = str(settings.BASE_DIR)+ "/media/img/"+ dirname #子資料夾路徑
     files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))] #找出子資料夾下的所有圖檔
     for file in files:
         imgexif = image_getgps(path, file, dirname)

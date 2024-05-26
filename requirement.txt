@@ -41,7 +41,7 @@ mccabe==0.7.0
 mediapipe==0.9.1.0
 multidict==6.0.4
 nodeenv==1.7.0
-numpy==1.26.4
+numpy==1.24.4
 openai==0.27.2
 opencv-contrib-python==4.7.0.72
 orjson==3.8.10
@@ -59,7 +59,6 @@ pyflakes==3.0.1
 python-dotenv==1.0.0
 python-lsp-server==1.7.1
 pytoolconfig==1.2.5
-pywin32==306
 readability-lxml==0.8.1
 redis==4.5.4
 requests==2.28.2
