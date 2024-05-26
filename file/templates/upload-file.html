@@ -4,13 +4,20 @@
 {% load static %}
 {% block content %}
 {% if user.is_authenticated %}
+    <p class="fw-bold">
+        操作步驟<br>
+        Step1：建立一個資料夾，放入要顯示的圖片，接著將資料夾壓縮成一個zip檔，
+        上傳此zip檔，資料夾名稱會變成相簿名稱。<br>
+        Step2：程式能製作縮圖，縮圖用於地圖上，原圖會用於相簿。
+        上傳完成後，請先點選「解壓縮」再點選「製作縮圖」。<br>
+    </p>
     <form action="{% url 'file:upload' %}" method="POST" enctype="multipart/form-data">
-        <input type="text" name="fileTitle" placeholder="Enter a title or Filename">
+        <input type="text" name="fileTitle" placeholder="多張圖片的zip壓縮檔">
         <input type="file"  name="uploadedFile">
         {% csrf_token %}
-        <input type="submit" class="btn btn-primary" value="Upload">
+        <input type="submit" class="btn btn-success" value="上傳(Upload)">
     </form>
-    <table  class="table table-dark">
+    <table  class="table table-warning">
         <tr>
             <th scope="col">ID</th>
             <th scope="col">檔案名稱</th>
