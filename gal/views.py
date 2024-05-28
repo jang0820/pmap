@@ -18,11 +18,11 @@ class GalView(TemplateView): #將指定資料夾下不是tH開頭的圖片製作
     
 class GalListView(ListView): #列出media/img下的所有子資料夾
     template_name = 'gallist.html'
-    imgpath = str(settings.BASE_DIR)+ "/media/img/"
-    dirs = [d for d in os.listdir(imgpath) if os.path.isdir(os.path.join(str(settings.BASE_DIR)+ "/media/img/", d))] #找出子資料夾
     queryset = {}
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["dirs"] = self.dirs
+        imgpath = str(settings.BASE_DIR)+ "/media/img/"
+        dirs = [d for d in os.listdir(imgpath) if os.path.isdir(os.path.join(str(settings.BASE_DIR)+ "/media/img/", d))] #找出子資料夾
+        context["dirs"] = dirs
         return context

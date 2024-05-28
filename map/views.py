@@ -47,12 +47,12 @@ class MapView(TemplateView): #列出指定資料夾下所有圖片到地圖上
 
 class MapListView(ListView):  #列出資料夾media\img下所有子資料夾
     template_name = 'maplist.html'
-    imgpath = str(settings.BASE_DIR)+ "/media/img/"
-    dirs = [d for d in os.listdir(imgpath) if os.path.isdir(os.path.join(str(settings.BASE_DIR)+ "/media/img/", d))] #找出子資料夾
     queryset = {}
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["dirs"] = self.dirs
+        imgpath = str(settings.BASE_DIR)+ "/media/img/"
+        dirs = [d for d in os.listdir(imgpath) if os.path.isdir(os.path.join(str(settings.BASE_DIR)+ "/media/img/", d))] #找出子資料夾
+        context["dirs"] = dirs
         return context
 
