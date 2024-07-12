@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block content %} 
+<form action="{% url 'gal:searchdir' %}" method="get">
+  <label for="dir">輸入要搜尋的字串 </label>
+  <input
+    type="text"
+    name="query"
+    value="" />
+  <input type="submit" value="送出" />
+</form>
+
   <h3>相簿</h3>
 {% if dirp %}
   {% for dir in dirp.object_list %}

@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render
 from map.models import Img
 from django.views.generic import TemplateView, ListView
@@ -5,7 +6,7 @@ from pmap import settings
 from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
-import os
+from map.models import Img
 
 class GalView(TemplateView): #將指定資料夾下不是tH開頭的圖片製作成相簿
     template_name = 'img.html'
@@ -19,7 +20,7 @@ class GalView(TemplateView): #將指定資料夾下不是tH開頭的圖片製作
         context["imgs"] = imgs
         return context
     
-class GalListView(ListView): #列出media/img下的所有子資料夾
+class GalListView(ListView): #列出media/img下的所有子資料夾，每分頁10個資料夾
     template_name = 'gallist.html'
     queryset = {}
     
@@ -38,4 +39,19 @@ class GalListView(ListView): #列出media/img下的所有子資料夾
         except EmptyPage:  #不存在的分頁
             dirp = paginator.page(1)  #指定第一個分頁
         context["dirp"] = dirp
+        return context
+
+class GalSearchDirListView(ListView):  #使用字串搜尋資料夾media\img下的子資料夾名稱
+    template_name = 'galsearchdirlist.html'
+    queryset = {}
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.method == 'GET':
+            query = self.request.GET['query']
+            imgs = Img.objects.filter(dirname__contains=query) #取出圖片中所有資料夾名稱是否包含字串query
+            dirs = []
+            for item in imgs: #所有資料夾名稱只取一次
+                if item.dirname not in dirs: dirs.append(item.dirname)
+            context["dirs"] = dirs
         return context

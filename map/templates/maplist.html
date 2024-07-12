@@ -2,15 +2,23 @@
 
 {% block content %}
   <h3>相簿地圖</h3>
-  {% if dirs %}
-    <ul class="list-group">
-      {% for dir in dirs %}
-      <li  class="list-group-item list-group-item-success h4">
-        <a href="{% url 'map:listdir' dir %}">{{ dir }}</a>
-      </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>沒有圖片資料夾</p>
-  {% endif %}
+
+  {% if dirp %}
+  {% for dir in dirp.object_list %}
+  <li  class="list-group-item list-group-item-success h4">
+    <a href="{% url 'map:listdir' dir %}">{{ dir }}</a>
+  </li>
+  {% endfor %}
+  <ul class="pagination">
+  {% for page_number in dirp.paginator.page_range %}
+    {% if page_number == dirp.number %}
+    <li class="page-item active"><a class="page-link">{{ page_number }}</a></li>
+    {% else %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_number }}">{{ page_number }}</a></li>
+    {% endif %}
+  {% endfor %}
+  </ul>
+{% else %}
+<p>沒有圖片資料夾</p>
+{% endif %}
 {% endblock %}
