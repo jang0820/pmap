@@ -59,7 +59,7 @@ class MapListView(ListView):  #列出資料夾media\img下所有子資料夾，�
         context["dirs"] = dirs
         limit = 10  #每個分頁10個資料夾
         paginator = Paginator(dirs, limit)  #設定分頁的資料夾數量
-        page = self.request.GET.get('page')  #取出網址的page
+        page = self.request.GET.get('page')  #取出網址的變數page的值(?page=xx)
         try:
             dirp = paginator.page(page)  #指定第幾個page
         except PageNotAnInteger:  #page不是整數

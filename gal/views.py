@@ -31,7 +31,7 @@ class GalListView(ListView): #列出media/img下的所有子資料夾，每分�
         context["dirs"] = dirs
         limit = 10  #每個分頁10個資料夾
         paginator = Paginator(dirs, limit)  #設定分頁的資料夾數量
-        page = self.request.GET.get('page')  #取出網址的page
+        page = self.request.GET.get('page')  #取出網址的page的值(?page=xx)
         try:
             dirp = paginator.page(page)  #指定第幾個page
         except PageNotAnInteger:  #page不是整數
@@ -48,8 +48,8 @@ class GalSearchDirListView(ListView):  #使用字串搜尋資料夾media\img下�
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.method == 'GET':
-            query = self.request.GET['query']
-            imgs = Img.objects.filter(dirname__contains=query) #取出圖片中所有資料夾名稱是否包含字串query
+            query = self.request.GET['query'] #取出網址的page的字串(?query=xxx)
+            imgs = Img.objects.filter(dirname__contains=query) #取出所有子資料夾名稱是否包含字串query
             dirs = []
             for item in imgs: #所有資料夾名稱只取一次
                 if item.dirname not in dirs: dirs.append(item.dirname)
